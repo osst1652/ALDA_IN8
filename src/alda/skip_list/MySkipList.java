@@ -27,7 +27,7 @@ public class MySkipList<K extends Comparable<K>, V>{
 	 * Konstruktor av skip list.
 	 * */
 	public MySkipList() {
-		head = new SkipNode (null, null, null, null, 0);
+		head = new SkipNode (null, null, null, null, 0); // K key, V value, SkipNode next, SkipNode down, Lon level
 		random = new Random();
 		siz = 0;
 		probabilityFactor = 0.5;
@@ -44,6 +44,39 @@ public class MySkipList<K extends Comparable<K>, V>{
 	 *
 	 * */
 	public void Insert(K key, V value){
+		
+		
+		long level = level();
+		
+		if(head.level < level){
+			head = new SkipNode(null,null, null, head, level);
+		}
+		
+		SkipNode currentNode = head;
+		SkipNode lastNode = null;
+		
+		while(currentNode != null){
+			if(currentNode.next.key.compareTo(key) > 0 || currentNode.next == null){
+				if(currentNode.level <= level){
+					SkipNode n = new SkipNode(key, value, currentNode.next, null, currentNode.level);
+					if(lastNode != null){
+						lastNode.down = n;
+					}
+					
+					currentNode.next = n;
+					lastNode = n;
+				}
+				
+				currentNode = currentNode.down;
+				continue;
+			}else if(currentNode.next.key.equals(key)){
+				currentNode.next.value= value;
+				return;
+			}
+			
+			currentNode = currentNode.next;
+		}
+		siz++;
 		
 	}
 	
