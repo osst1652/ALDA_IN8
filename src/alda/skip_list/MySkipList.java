@@ -8,45 +8,39 @@ import java.util.Random;
  * 
  * Write the routines to perform insertion, deletion, and searching in skip lists.
  * 
- * 
- * 
  * @author Oskar Steinhauf
  * 
  * */
 
 
-public class MySkipList<K extends Comparable<K>, V>{
-	
-	private SkipNode head;
-	private Random random;
-	private long siz;
-	private double probabilityFactor;
-	
-	public static void main (String[]args){
-		MySkipList sk = new MySkipList<Integer, Integer>();
-		sk.Insert(5, 10);
-		sk.Insert(10, 25);
-		sk.Insert(12, 28);
-		sk.Insert(15, 35);
-		sk.Insert(1, 2);
-		sk.Insert(3, 50);
-		
+public class MySkipList<T extends Comparable<? super T>>{
 
-	}
+	private int sizeOfList;
+	private SkipNode<T> startNode;
 	
 	/**
 	 * Konstruktor av skip list.
+	 * 
+	 * @param antalet levels man vill ha i listan
 	 * */
-	public MySkipList() {
-		head = new SkipNode (null, null, null, null, 0); // K key, V value, SkipNode next, SkipNode down, Lon level
-		random = new Random();
-		siz = 0;
-		probabilityFactor = 0.5;
+
+	public MySkipList(int level){
+		startNode = new SkipNode<T>(null, level);
+		this.sizeOfList = 0;
 		
 	}
 	
+	//Default konstruktor
+	public MySkipList(){
+		this(3);
+	}
+	
+
+	
+	
 	/**
-	 * Insert an element in the skip list.
+	 * Insertion funktionen som lägger till ett element i listan
+	 * 
 	 * 
 	 * @param key
 	 * 
@@ -54,131 +48,176 @@ public class MySkipList<K extends Comparable<K>, V>{
 	 * 
 	 *
 	 * */
-	public void Insert(K key, V value){
+	
+	public boolean insert(T data){
+		if(search(data)) return false; //Lägg inte till element om elementet redan finns
 		
+		SkipNode<T> currentNode = startNode;
+		SkipNode<T> newSkipNode = new SkipNode<T>(data, setNodeLevel());
 		
-		long level = level();
+		int level = currentNode.level-1;
 		
-		if(head.level < level){
-			head = new SkipNode(null,null, null, head, level);
-		}
-		
-		SkipNode currentNode = head;
-		SkipNode lastNode = null;
-		
-		while(currentNode != null){
-			if(currentNode.next.key.compareTo(key) > 0 || currentNode.next == null){
-				if( level >= currentNode.level){
-					SkipNode n = new SkipNode(key, value, currentNode.next, null, currentNode.level);
-					if(lastNode != null){
-						lastNode.down = n;
-					}
-					
-					currentNode.next = n;
-					lastNode = n;
+		do{
+			SkipNode<T> nextNode = currentNode.nextNode[level];
+			
+			if(nextNode == null){
+				if(newSkipNode.level > level){
+					newSkipNode.set(nextNode,level);
+					currentNode.set(newSkipNode, level);
 				}
-				
-				currentNode = currentNode.down;
-				continue;
-			}else if(currentNode.next.key.equals(key)){
-				currentNode.next.value= value;
-				return;
+				level--;
+			}else if(newSkipNode.data.compareTo(nextNode.data)>0){
+				currentNode = nextNode;
+			}else{
+				if(newSkipNode.level > level){
+					currentNode.set(newSkipNode, level);
+					newSkipNode.set(nextNode, level);
+				}
+				level--;
 			}
 			
-			currentNode = currentNode.next;
-		}
-		siz++;
+		}while(0 <= level);
 		
+		this.sizeOfList++;
+		return true;
 	}
 	
 	
+	
 	/**
-	 * Delete an element in the skip list.
+	 * Tar bort ett element ur listan
 	 * 
-	 * @param Key of which this element in the list will be removed
+	 * @param elementet att ta bort
+	 * 
+	 * @return true om elementet tagits bort
+	 * 
+	 * @return false om elementet inte hittades
 	 * 
 	 * */
-	public V delete(K key){
-		V value = null;
+	public boolean remove(T data){
+		SkipNode<T> currentNode = startNode;
+		int levelInList = currentNode.level-1;
+		boolean removed = false;
 		
-		SkipNode currentNode = head;
-		while(currentNode != null){
-			if(currentNode.next.key.compareTo(key)>=0 || currentNode.next == null){
-				if(currentNode.next.key.equals(key) && currentNode.next != null){
-					value = currentNode.next.value;
-					currentNode.next = currentNode.next.next;
-				}
+		do{
+			SkipNode<T> nextNode = currentNode.nextNode[levelInList];
+			if(nextNode == null){
 				
-				currentNode = currentNode.down;
-				continue;
+				levelInList--;
+			}else if(data.compareTo(nextNode.data) == 0){
+				/*
+				 * Elementet är hittat och det ska tas bort
+				 * */
+				currentNode.set(nextNode.nextNode[levelInList],levelInList);
+				levelInList--;
+				removed = true;
+				
+			}else if(data.compareTo(nextNode.data)> -1){
+				currentNode = nextNode;
+				
+			}else{
+				levelInList--;
 			}
-			currentNode = currentNode.next;
-		}
+			
+			
+		}while(0 <= levelInList);
 		
-		siz--;
-		return value;
+		if(removed) this.sizeOfList--;
+		
+		return removed;
+		
 	}
+
 	
 	
 	/**
-	 * Searching for an element in the skip List
+	 * Letar efter ett element i listan
 	 * 
 	 *
-	 * @param key
+	 * @param element to search for
 	 * 
-	 * @return value på nyckeln om den finns med nyckeln
+	 * @return true om elementet har hittats
 	 * 
-	 * @return null om den inte finns
+	 * @return false om den inte hittats
 	 * */
-	
-	public V get(K key){
+	public boolean search(T data){
+		SkipNode<T> currentNode = startNode;
+		SkipNode<T> nextNode = null;
+		int level = currentNode.level-1;
 		
-		SkipNode currentNode = head;
-		while(currentNode != null){
-			if(currentNode.next.key.compareTo(key)>0 || currentNode.next == null){
-				currentNode = currentNode.down;
-				continue;
-			}else if(currentNode.next.key.equals(key)){
-				return currentNode.next.value;
-			}
+		while(0 <= level){
+			nextNode = currentNode.nextNode[level];
 			
-			currentNode = currentNode.next;	
+			if(nextNode == null){
+				level--; continue;
+			}else if(data.compareTo(nextNode.data) == 0){
+				break;
+			}else if(data.compareTo(nextNode.data) > 0 ){
+				currentNode = nextNode;
+			}else{
+				level--;
+			}
 		}
+		if(nextNode!= null) return true;
+		else	return false;
+
 		
-		return null;
+
 	}
-	
+
 
 	/**
-	 * All the private functions and methods that are used.
-
+	 * 
+	 * Övriga funktioner
+	 * 
 	 * */
-
-	private long level(){
-		long level = 0;
+	
+	/**
+	 * Hämta storleken på hela listan 
+	 **/
+	
+	public int getSize(){
+		return this.sizeOfList;
+	}
+	
+	/**
+	 * Sätter en slumpmässig antal levlar för noden
+	 * 
+	 * @return en level som noden ska ha. 
+	 */
+	private int setNodeLevel(){
+		Random r = new Random();
+		int levelForNode = 1;
 		do{
-			level++;
-		}while(level <= siz && random.nextDouble() < probabilityFactor);
-		return level;
+			levelForNode++;
+		}while(levelForNode < startNode.level && r.nextBoolean());
+		
+		return levelForNode;
+	}
+	
+	/**
+	 * Nodklass
+	 * */
+	
+	private class SkipNode<T>{
+		private T data; 
+		private int level;
+		
+		private SkipNode<T> [] nextNode;
+		
+		@SuppressWarnings("unchecked")
+		public SkipNode(T data, int level){
+			this.data = data;
+			this.level = level;
+			this.nextNode = (SkipNode<T> []) new SkipNode[level];
+		}
+		
+		public void set(SkipNode<T> node, int level){
+			this.nextNode[level] = node;
+		}
+		
 	}
 
-	private class SkipNode{
-		public K key;
-		public V value;
-		
-		public SkipNode next;
-		public SkipNode down;
-		
-		public long level;
-	
-		public SkipNode(K key, V value, SkipNode next, SkipNode Down, long level){
-			this.key = key;
-			this.value = value;
-			this.next = next;
-			this.down = down;
-			this.level = level;
-		}
-	
-	}
+
 }
 
