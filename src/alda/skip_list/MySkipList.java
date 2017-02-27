@@ -22,6 +22,17 @@ public class MySkipList<K extends Comparable<K>, V>{
 	private long siz;
 	private double probabilityFactor;
 	
+	public static void main (String[]args){
+		MySkipList sk = new MySkipList<Integer, Integer>();
+		sk.Insert(5, 10);
+		sk.Insert(10, 25);
+		sk.Insert(12, 28);
+		sk.Insert(15, 35);
+		sk.Insert(1, 2);
+		sk.Insert(3, 50);
+		
+
+	}
 	
 	/**
 	 * Konstruktor av skip list.
@@ -57,7 +68,7 @@ public class MySkipList<K extends Comparable<K>, V>{
 		
 		while(currentNode != null){
 			if(currentNode.next.key.compareTo(key) > 0 || currentNode.next == null){
-				if(currentNode.level <= level){
+				if( level >= currentNode.level){
 					SkipNode n = new SkipNode(key, value, currentNode.next, null, currentNode.level);
 					if(lastNode != null){
 						lastNode.down = n;
@@ -90,6 +101,21 @@ public class MySkipList<K extends Comparable<K>, V>{
 	public V delete(K key){
 		V value = null;
 		
+		SkipNode currentNode = head;
+		while(currentNode != null){
+			if(currentNode.next.key.compareTo(key)>=0 || currentNode.next == null){
+				if(currentNode.next.key.equals(key) && currentNode.next != null){
+					value = currentNode.next.value;
+					currentNode.next = currentNode.next.next;
+				}
+				
+				currentNode = currentNode.down;
+				continue;
+			}
+			currentNode = currentNode.next;
+		}
+		
+		siz--;
 		return value;
 	}
 	
@@ -100,9 +126,24 @@ public class MySkipList<K extends Comparable<K>, V>{
 	 *
 	 * @param key
 	 * 
+	 * @return value på nyckeln om den finns med nyckeln
+	 * 
+	 * @return null om den inte finns
 	 * */
 	
 	public V get(K key){
+		
+		SkipNode currentNode = head;
+		while(currentNode != null){
+			if(currentNode.next.key.compareTo(key)>0 || currentNode.next == null){
+				currentNode = currentNode.down;
+				continue;
+			}else if(currentNode.next.key.equals(key)){
+				return currentNode.next.value;
+			}
+			
+			currentNode = currentNode.next;	
+		}
 		
 		return null;
 	}
