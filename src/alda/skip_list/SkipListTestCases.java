@@ -46,19 +46,40 @@ public class SkipListTestCases {
 	
 	@Test
 	public void characterTest(){
-		MySkipList<Character> listChar = new MySkipList<Character>(4);
-		listChar.insert('A');
-		listChar.insert('B');
-		listChar.insert('C');
-		listChar.insert('D');
-		listChar.insert('E');
+		MySkipList<Character> skipList = new MySkipList<Character>();
+		skipList.insert('A');
+		skipList.insert('B');
+		skipList.insert('C');
+		skipList.insert('D');
+		skipList.insert('E');
 		
-		assertTrue(listChar.search('A'));
-		assertFalse(listChar.search('Z'));
-		assertFalse(listChar.insert('A'));
+		skipList.insert('F');
+		skipList.insert('G');
+		skipList.insert('H');
+		skipList.insert('I');
+		skipList.insert('J');
 		
-		assertTrue(listChar.remove('A'));
-		assertEquals(4, listChar.getSize());
+		assertTrue(skipList.search('A'));
+		assertTrue(skipList.search('B'));
+		assertTrue(skipList.search('C'));
+		assertTrue(skipList.search('D'));
+		assertTrue(skipList.search('E'));
+		assertTrue(skipList.search('F'));
+		assertTrue(skipList.search('G'));
+		assertTrue(skipList.search('H'));
+		assertTrue(skipList.search('I'));
+		assertTrue(skipList.search('J'));
+		
+		assertFalse(skipList.search('Z'));
+		assertFalse(skipList.insert('A'));
+		
+		assertTrue(skipList.remove('A'));
+		assertFalse(skipList.search('A'));
+		
+		skipList.insert('A');
+		assertTrue(skipList.search('A'));
+		
+		assertEquals(10, skipList.getSize());
 	}
 	
 }

@@ -134,7 +134,7 @@ public class MySkipList<T extends Comparable<? super T>>{
 	 * Letar efter ett element i listan
 	 * 
 	 *
-	 * @param element to search for
+	 * @param elementet att hitta
 	 * 
 	 * @return true om elementet har hittats
 	 * 
@@ -145,24 +145,22 @@ public class MySkipList<T extends Comparable<? super T>>{
 		SkipNode<T> nextNode = null;
 		int level = currentNode.level-1;
 		
-		while(0 <= level){
+		do{
 			nextNode = currentNode.nextNode[level];
 			
 			if(nextNode == null){
 				level--; continue;
 			}else if(data.compareTo(nextNode.data) == 0){
-				break;
+				return true;
 			}else if(data.compareTo(nextNode.data) > 0 ){
 				currentNode = nextNode;
 			}else{
 				level--;
 			}
-		}
-		if(nextNode!= null) return true;
-		else	return false;
-
+		}while(0 <= level);
 		
 
+		return false;
 	}
 
 
@@ -177,7 +175,7 @@ public class MySkipList<T extends Comparable<? super T>>{
 	 **/
 	
 	public int getSize(){
-		return this.sizeOfList;
+		return sizeOfList;
 	}
 	
 	/**
