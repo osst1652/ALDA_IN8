@@ -10,6 +10,10 @@ import java.util.Random;
  * 
  * @author Oskar Steinhauf
  * 
+ * @author Filip Fellman
+ * 
+ * @author Erik Svärdson
+ * 
  * */
 
 
@@ -69,7 +73,7 @@ public class MySkipList<T extends Comparable<? super T>>{
 			}else if(newSkipNode.data.compareTo(nextNode.data)>0){
 				currentNode = nextNode;
 			}else{
-				if(newSkipNode.level > level){
+				if(level < newSkipNode.level ){
 					currentNode.set(newSkipNode, level);
 					newSkipNode.set(nextNode, level);
 				}
@@ -78,7 +82,7 @@ public class MySkipList<T extends Comparable<? super T>>{
 			
 		}while(0 <= level);
 		
-		this.sizeOfList++;
+		sizeOfList++;
 		return true;
 	}
 	
@@ -98,11 +102,9 @@ public class MySkipList<T extends Comparable<? super T>>{
 		SkipNode<T> currentNode = startNode;
 		int levelInList = currentNode.level-1;
 		boolean removed = false;
-		
 		do{
 			SkipNode<T> nextNode = currentNode.nextNode[levelInList];
-			if(nextNode == null){
-				
+			if(nextNode == null){	
 				levelInList--;
 			}else if(data.compareTo(nextNode.data) == 0){
 				/*
@@ -119,13 +121,10 @@ public class MySkipList<T extends Comparable<? super T>>{
 				levelInList--;
 			}
 			
-			
 		}while(0 <= levelInList);
 		
-		if(removed) this.sizeOfList--;
-		
+		if(removed) sizeOfList--;
 		return removed;
-		
 	}
 
 	
