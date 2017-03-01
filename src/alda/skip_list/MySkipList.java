@@ -46,10 +46,11 @@ public class MySkipList<T extends Comparable<? super T>>{
 	 * Insertion funktionen som lägger till ett element i listan
 	 * 
 	 * 
-	 * @param key
+	 * @param element man vill stoppa in
 	 * 
-	 * @param value
+	 * @return true om gick att stoppa in
 	 * 
+	 *  @return false om elementet redan finns
 	 *
 	 * */
 	
